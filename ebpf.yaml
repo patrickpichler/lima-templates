@@ -66,11 +66,11 @@ provision:
       mkdir "$HOME/.config/nix"
       echo 'extra-experimental-features = flakes nix-command' > "$HOME/.config/nix/nix.conf"
 
-      nix-env -i wezterm chezmoi neovim git jq ripgrep fd nodejs go delta
-
       nix profile install \
                 nixpkgs#protobuf nixpkgs#protoc-gen-go-grpc nixpkgs#protoc-gen-go \
-                nixpkgs#kind nixpkgs#kubectl
+                nixpkgs#kind nixpkgs#kubectl nixpkgs#wezterm nixpkgs#chezmoi nixpkgs#neovim \
+                nixpkgs#git nixpkgs#jq nixpkgs#ripgrep nixpkgs#fd nixpkgs#nodejs nixpkgs#go \
+                nixpkgs#delta
 
       chezmoi init https://github.com/patrickpichler/dotfiles.git
       chezmoi apply
