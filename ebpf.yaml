@@ -17,6 +17,10 @@ containerd:
 provision:
   - mode: system
     script: |
+      #!/bin/bash
+
+      set -eux -o pipefail
+
       export DEBIAN_FRONTEND=noninteractive
 
       apt-get update && apt-get upgrade
@@ -25,7 +29,7 @@ provision:
                 apt-transport-https ca-certificates curl \
                 sudo coreutils findutils  \
                 bash git curl rsync \
-                build-essential clang-14 clang-format-14 clang-tidy-14 clangd-14 llvm-14 make pkg-config \
+                build-essential make pkg-config \
                 libelf-dev \
                 zlib1g-dev \
                 libbpf-dev \
@@ -33,51 +37,59 @@ provision:
                 linux-tools-generic \
                 fish
 
-      update-alternatives --install /usr/bin/clang clang /usr/bin/clang-14 140 \
-                          --slave /usr/bin/clang++ clang++ /usr/bin/clang++-14 \
-                          --slave /usr/bin/llc llc /usr/bin/llc-14 \
-                          --slave /usr/bin/clang-format clang-format /usr/bin/clang-format-14 \
-                          --slave /usr/bin/clangd clangd /usr/bin/clangd-14 \
-                          --slave /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-14
-
       apt-get install -y bash-completion vim \
               iproute2 vlan bridge-utils net-tools \
               netcat-openbsd iputils-ping \
-              wget lynx w3m \
-              stress \
+              wget \
               dnsutils
   - mode: user
     script: |
-      tempfile=$(mktemp) \
-        && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo \
-        && tic -x -o ~/.terminfo $tempfile \
-        && rm $tempfile
-  - mode: user
-    script: |
+      #!/bin/bash
+
+      set -eux -o pipefail
+
       if ! command -v nix &> /dev/null; then
         curl -L https://nixos.org/nix/install | sh -s -- --daemon
+
+        echo 'extra-experimental-features = flakes nix-command' | sudo tee -a /etc/nix/nix.conf
       fi
 
-      source /etc/bashrc
+  - mode: system
+    script: |
+      #!/bin/bash
 
-      mkdir "$HOME/.config/nix"
-      echo 'extra-experimental-features = flakes nix-command' > "$HOME/.config/nix/nix.conf"
+      set -eux -o pipefail
 
+      # This command is expected to fail on first try after installation. For everything to be setup
+      # correctly, the VM needs to be restarted.
       nix profile install \
-                nixpkgs#protobuf nixpkgs#protoc-gen-go-grpc nixpkgs#protoc-gen-go \
-                nixpkgs#kind nixpkgs#kubectl nixpkgs#wezterm nixpkgs#chezmoi nixpkgs#neovim \
-                nixpkgs#git nixpkgs#jq nixpkgs#ripgrep nixpkgs#fd nixpkgs#nodejs nixpkgs#go \
-                nixpkgs#delta \
-                nixpkgs#devbox
+              nixpkgs#protobuf nixpkgs#protoc-gen-go-grpc nixpkgs#protoc-gen-go \
+              nixpkgs#kind nixpkgs#kubectl nixpkgs#wezterm nixpkgs#chezmoi nixpkgs#neovim \
+              nixpkgs#git nixpkgs#jq nixpkgs#ripgrep nixpkgs#fd nixpkgs#nodejs nixpkgs#go \
+              nixpkgs#clang_14 nixpkgs#llvmPackages_14.clang-tools \
+              nixpkgs#delta nixpkgs#devbox nixpkgs#bpftrace nixpkgs#stress nixpkgs#stress-ng
 
-      sudo cp ~/.nix-profile/share/terminfo/w/wezterm /usr/share/terminfo/
+  - mode: user
+    script: |
+      #!/bin/bash
 
-      chezmoi init https://github.com/patrickpichler/dotfiles.git
-      chezmoi apply
+      set -eux -o pipefail
 
-      fish -c 'set --universal fish_greeting'
+      if ! -e /usr/share/terminfo/w/wezterm; then
+        sudo cp /nix/var/nix/profiles/default/share/terminfo/w/wezterm /usr/share/terminfo/w/
+      fi
 
-      sudo chsh $USER -s $(command -v fish)
+      # git status will fail, if chezmoi is not initialized
+      if ! $(chezmoi git status &>/dev/null); then
+        chezmoi init https://github.com/patrickpichler/dotfiles.git
+        chezmoi apply
+      fi
+
+
+      if [ $(getent passwd $LOGNAME | cut -d: -f7) != '/usr/bin/fish' ]; then
+        fish -c 'set --universal fish_greeting'
+        sudo chsh $USER -s $(command -v fish)
+      fi
 
       # TODO: figure out a better way of doing this... maybe use chezmoi??
       # TODO: remove nvim-osc52 plugin as soon as nvim-0.10 is released
@@ -119,7 +131,7 @@ provision:
       }
       EOF
 
-      # this forces nvim to install all prasers with libstd++ found
+      # this forces nvim to install all parsers with libstd++ found
       nix-shell -p gcc --command 'nvim -c :quit'
   - mode: system
     # This script defines the host.docker.internal hostname when hostResolver is disabled.
