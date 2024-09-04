@@ -19,17 +19,17 @@ provision:
     script: |
       export DEBIAN_FRONTEND=noninteractive
 
-      apt-get update
+      apt-get update && apt-get upgrade
 
       apt-get install -y \
                 apt-transport-https ca-certificates curl \
                 sudo coreutils findutils  \
                 bash git curl rsync \
                 build-essential clang-14 clang-format-14 clang-tidy-14 clangd-14 llvm-14 make pkg-config \
-                linux-headers-generic \
                 libelf-dev \
                 zlib1g-dev \
                 libbpf-dev \
+                linux-headers-generic \
                 linux-tools-generic \
                 fish
 
@@ -48,21 +48,18 @@ provision:
               dnsutils
   - mode: user
     script: |
-      curl -L https://nixos.org/nix/install | sh
-
-      tempfile=$(mktemp) \
-        && curl -fsSL https://get.jetpack.io/devbox -o $tempfile \
-        && chmod +x $tempfile \
-        && $tempfile -f \
-        && rm $tempfile
-  - mode: user
-    script: |
       tempfile=$(mktemp) \
         && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo \
         && tic -x -o ~/.terminfo $tempfile \
         && rm $tempfile
   - mode: user
     script: |
+      if ! command -v nix &> /dev/null; then
+        curl -L https://nixos.org/nix/install | sh -s -- --daemon
+      fi
+
+      source /etc/bashrc
+
       mkdir "$HOME/.config/nix"
       echo 'extra-experimental-features = flakes nix-command' > "$HOME/.config/nix/nix.conf"
 
@@ -70,7 +67,10 @@ provision:
                 nixpkgs#protobuf nixpkgs#protoc-gen-go-grpc nixpkgs#protoc-gen-go \
                 nixpkgs#kind nixpkgs#kubectl nixpkgs#wezterm nixpkgs#chezmoi nixpkgs#neovim \
                 nixpkgs#git nixpkgs#jq nixpkgs#ripgrep nixpkgs#fd nixpkgs#nodejs nixpkgs#go \
-                nixpkgs#delta
+                nixpkgs#delta \
+                nixpkgs#devbox
+
+      sudo cp ~/.nix-profile/share/terminfo/w/wezterm /usr/share/terminfo/
 
       chezmoi init https://github.com/patrickpichler/dotfiles.git
       chezmoi apply
@@ -129,6 +129,14 @@ provision:
     script: |
       #!/bin/sh
       sed -i 's/host.lima.internal.*/host.lima.internal host.docker.internal/' /etc/hosts
+
+  # Increase file watches limit.
+  - mode: system
+    script: |
+      #!/bin/sh
+      sysctl fs.inotify.max_user_watches=524288
+      sysctl fs.inotify.max_user_instances=512
+
   - mode: system
     script: |
       #!/bin/bash
