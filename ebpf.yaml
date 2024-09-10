@@ -15,7 +15,7 @@ containerd:
   system: false
   user: false
 provision:
-  - mode: system
+  - mode: dependency
     script: |
       #!/bin/bash
 
@@ -23,7 +23,7 @@ provision:
 
       export DEBIAN_FRONTEND=noninteractive
 
-      apt-get update && apt-get upgrade
+      apt-get update && apt-get upgrade -y
 
       apt-get install -y \
                 apt-transport-https ca-certificates curl \
@@ -42,23 +42,34 @@ provision:
               netcat-openbsd iputils-ping \
               wget \
               dnsutils
-  - mode: user
+
+  - mode: dependency
     script: |
       #!/bin/bash
 
       set -eux -o pipefail
 
-      if ! command -v nix &> /dev/null; then
+      export HOME=/root
+
+      if [ -f /etc/bashrc ]; then
+        source /etc/bashrc
+      fi
+
+      if [ ! $(command -v nix &> /dev/null) ] ; then
+        echo 'installing nix...'
         curl -L https://nixos.org/nix/install | sh -s -- --daemon
 
         echo 'extra-experimental-features = flakes nix-command' | sudo tee -a /etc/nix/nix.conf
       fi
 
-  - mode: system
+  - mode: dependency
     script: |
       #!/bin/bash
 
       set -eux -o pipefail
+
+      export HOME=/root
+      source /etc/bashrc
 
       # This command is expected to fail on first try after installation. For everything to be setup
       # correctly, the VM needs to be restarted.
@@ -79,9 +90,7 @@ provision:
     script: |
       #!/bin/bash
 
-      set -eux -o pipefail
-
-      if ! -e /usr/share/terminfo/w/wezterm; then
+      if [ ! -e /usr/share/terminfo/w/wezterm ]; then
         sudo cp /nix/var/nix/profiles/default/share/terminfo/w/wezterm /usr/share/terminfo/w/
       fi
 
