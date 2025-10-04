@@ -73,11 +73,10 @@ provision:
 
       # This command is expected to fail on first try after installation. For everything to be setup
       # correctly, the VM needs to be restarted.
-      nix profile install \
+      nix profile add \
               nixpkgs#protobuf nixpkgs#protoc-gen-go-grpc nixpkgs#protoc-gen-go \
               nixpkgs#kind nixpkgs#kubectl nixpkgs#wezterm nixpkgs#chezmoi nixpkgs#neovim \
               nixpkgs#git nixpkgs#jq nixpkgs#ripgrep nixpkgs#fd nixpkgs#nodejs nixpkgs#go \
-              nixpkgs#clang_14 nixpkgs#llvmPackages_14.clang-tools nixpkgs#llvm_14 \
               nixpkgs#delta nixpkgs#devbox nixpkgs#bpftrace nixpkgs#stress nixpkgs#stress-ng \
               nixpkgs#bear
 
