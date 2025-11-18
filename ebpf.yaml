@@ -210,6 +210,8 @@ mountType: "virtiofs"
 vmType: "vz"
 networks:
   - vzNAT: true
-rosetta:
-  enabled: true
-  binfmt: true
+vmOpts:
+  vz:
+    rosetta:
+      enabled: true
+      binfmt: true
