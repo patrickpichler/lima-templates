@@ -110,18 +110,6 @@ provision:
       cat <<EOF > $HOME/.config/nvim/lua/plugins/extension.lua
       return {
         {
-          'neovim/nvim-lspconfig',
-
-          init = function()
-            local lspconfig = require('lspconfig')
-
-            lspconfig.clangd.setup {
-              filetypes = { 'c', 'h', 'cpp', 'objc' },
-            }
-          end
-        },
-
-        {
           'ojroques/nvim-osc52',
 
           opts = {},
