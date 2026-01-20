@@ -78,7 +78,7 @@ provision:
               nixpkgs#kind nixpkgs#kubectl nixpkgs#wezterm nixpkgs#chezmoi nixpkgs#neovim \
               nixpkgs#git nixpkgs#jq nixpkgs#ripgrep nixpkgs#fd nixpkgs#nodejs nixpkgs#go \
               nixpkgs#delta nixpkgs#devbox nixpkgs#bpftrace nixpkgs#stress nixpkgs#stress-ng \
-              nixpkgs#bear
+              nixpkgs#bear nixpkgs#tree-sitter
 
       # In order to fix nix usage with sudo, allow the /nix/var/nix/profiles env var to be passed in as PATH
       cat <<EOF > /etc/sudoers.d/nix
