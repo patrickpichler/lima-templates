@@ -105,34 +105,6 @@ provision:
         sudo chsh $USER -s $(command -v fish)
       fi
 
-      # TODO: figure out a better way of doing this... maybe use chezmoi??
-      # TODO: remove nvim-osc52 plugin as soon as nvim-0.10 is released
-      cat <<EOF > $HOME/.config/nvim/lua/plugins/extension.lua
-      return {
-        {
-          'ojroques/nvim-osc52',
-
-          opts = {},
-
-          init = function()
-            local function copy(lines, _)
-              require('osc52').copy(table.concat(lines, '\n'))
-            end
-
-            local function paste()
-              return { vim.fn.split(vim.fn.getreg(''), '\n'), vim.fn.getregtype('') }
-            end
-
-            vim.g.clipboard = {
-              name = 'osc52',
-              copy = { ['+'] = copy, ['*'] = copy },
-              paste = { ['+'] = paste, ['*'] = paste },
-            }
-          end,
-        },
-      }
-      EOF
-
       # this forces nvim to install all parsers with libstd++ found
       nix-shell -p gcc --command 'nvim -c :quit'
   - mode: system
