@@ -1,0 +1,47 @@
+base:
+  - github:nixos-lima/nixos-lima/nixos.yaml
+
+mounts:
+  - location: "~"
+  - location: "~/development/"
+    writable: true
+  - location: "/tmp/lima"
+    writable: true
+
+mountType: "virtiofs"
+vmType: "vz"
+networks:
+  - vzNAT: true
+rosetta:
+  enabled: true
+  binfmt: true
+
+hostResolver:
+  # hostResolver.hosts requires lima 0.8.3 or later. Names defined here will also
+  # resolve inside containers, and not just inside the VM itself.
+  hosts:
+    host.docker.internal: host.lima.internal
+
+provision:
+  - mode: user
+    script: |
+      #!/usr/bin/env nix-shell
+      #! nix-shell -p chezmoi -i bash
+
+      # git status will fail, if chezmoi is not initialized
+      if ! $(chezmoi git status &>/dev/null); then
+        chezmoi init https://github.com/patrickpichler/dotfiles.git
+        chezmoi apply
+      fi
+
+portForwards:
+- guestSocket: "/run/docker.sock"
+  hostSocket: "{{.Dir}}/sock/docker.sock"
+
+message: |
+  To run `docker` on the host (assumes docker-cli is installed), run the following commands:
+  ------
+  docker context create lima-{{.Name}} --docker "host=unix://{{.Dir}}/sock/docker.sock"
+  docker context use lima-{{.Name}}
+  docker run hello-world
+  ------

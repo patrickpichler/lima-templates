@@ -1,0 +1,25 @@
+{
+  pkgs,
+  ...
+}:
+{
+  environment.systemPackages = with pkgs; [
+    unstable.neovim
+    kind
+    kubectl
+    chezmoi
+    git
+    jq
+    ripgrep
+    fd
+    go
+    nodejs
+    delta
+    bpftrace
+    stress-ng
+    bear
+    tree-sitter
+    rsync
+    tmux
+  ];
+}
