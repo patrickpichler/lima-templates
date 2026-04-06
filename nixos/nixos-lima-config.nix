@@ -105,6 +105,12 @@ in
     ghostty.terminfo
   ];
 
+  programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [
+    # Add any missing dynamic libraries for unpackaged programs
+    # here, NOT in environment.systemPackages
+  ];
+
   # The usual warnings about changing `stateVersion` apply. Make sure to find and read them
   # before changing this value.
   system.stateVersion = "25.11";
