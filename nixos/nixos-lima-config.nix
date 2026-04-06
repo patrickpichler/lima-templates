@@ -102,6 +102,7 @@ in
   # pkgs
   environment.systemPackages = with pkgs; [
     neovim
+    ghostty.terminfo
   ];
 
   # The usual warnings about changing `stateVersion` apply. Make sure to find and read them

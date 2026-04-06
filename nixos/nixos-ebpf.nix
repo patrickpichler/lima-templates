@@ -21,5 +21,6 @@
     tree-sitter
     rsync
     tmux
+    ghostty.terminfo
   ];
 }
