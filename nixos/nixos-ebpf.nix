@@ -22,5 +22,8 @@
     rsync
     tmux
     ghostty.terminfo
+    gdb
   ];
+
+  boot.kernelModules = [ "ublk_drv" ];
 }
