@@ -18,11 +18,12 @@
     bpftrace
     stress-ng
     bear
-    tree-sitter
     rsync
     tmux
     ghostty.terminfo
     gdb
+    tree-sitter
+    gcc
   ];
 
   boot.kernelModules = [ "ublk_drv" ];
