@@ -18,7 +18,7 @@
       nixos-lima,
     }:
     let
-      helpers = import ./helpers.nix {};
+      helpers = import ./helpers.nix { };
 
       overlays = [
         (final: _prev: {
