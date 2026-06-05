@@ -42,19 +42,10 @@ in
   #
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
-    # The `lima` module sets up systemd services to support LimaVM
-    # HACK(patrick.pichler): ENABLE AGAIN ONCE https://github.com/nixos-lima/nixos-lima/pull/52/changes HAS BEEN MERGED!!!
-
-    # nixos-lima.nixosModules.lima
-
-    ./custom-lima-init.nix
   ];
 
-  # TODO: Consider setting some/all of the mandatory settings in `nixos-lima.nixosModules.lima`
-
   # Enable lima-init, lima-guestagent, other config needed for Lima support (via `nixos-lima.nixosModules.lima`)
-  # HACK(patrick.pichler): ENABLE AGAIN ONCE https://github.com/nixos-lima/nixos-lima/pull/52/changes HAS BEEN MERGED!!!
-  # services.lima.enable = false;
+  services.lima.enable = true;
 
   # Using Flakes is highly-recommended, maybe even required.
   nix.settings.experimental-features = [
@@ -113,5 +104,5 @@ in
 
   # The usual warnings about changing `stateVersion` apply. Make sure to find and read them
   # before changing this value.
-  system.stateVersion = "25.11";
+  system.stateVersion = "26.05";
 }

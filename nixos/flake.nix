@@ -2,7 +2,7 @@
   description = "NixOS lima configurations";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nixos-lima = {
       url = "github:nixos-lima/nixos-lima/master";
@@ -39,6 +39,7 @@
 
           modules = [
             { nixpkgs.overlays = overlays; }
+            nixos-lima.nixosModules.lima
             ./nixos-lima-config.nix
             ./nixos-ebpf.nix
           ];
