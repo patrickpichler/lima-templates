@@ -30,3 +30,12 @@ Here the `nixos-ebpf-aarch64` configuration from the `nixos/flake.nix` configura
 
 Reboot the VM with `limactl reboot whatever`. It should no longer being stuck on boot-up and you
 should be greeted by a message explaining how to setup the docker daemon.
+
+## K3s server
+
+There also exists a configuration that spawns a local k3s serverr. To configure it, copy the config
+over to the lima vm and run the followin command:
+
+```sh
+sudo nixos-rebuild boot --flake /etc/nixos#nixos-ebpf-k3s-aarch64 --impure
+```

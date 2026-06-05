@@ -1,40 +1,12 @@
 {
-  config,
   modulesPath,
   pkgs,
   lib,
-  nixos-lima,
   ...
 }:
 let
-  parseEnv =
-    fileContent:
-    let
-      lines = builtins.split "\n" fileContent;
-      nonEmptyLines = builtins.filter (
-        line: builtins.isString (line) && line != "" && !(builtins.substring 0 1 line == "#")
-      ) lines;
-      parsed = builtins.listToAttrs (
-        builtins.map (
-          line:
-          let
-            parts = builtins.filter (line: builtins.isString line) (builtins.split "=" line);
-            name = builtins.head parts;
-            value = builtins.concatStringsSep "=" (builtins.tail parts);
-          in
-          {
-            name = name;
-            value = value;
-          }
-        ) nonEmptyLines
-      );
-    in
-    parsed;
-
-  # Read and parse the .env file injected by lima
-  envFile = "/mnt/lima-cidata/lima.env";
-  env = parseEnv (builtins.readFile envFile);
-  user = env.LIMA_CIDATA_USER;
+  helpers = import ./helpers.nix { };
+  user = helpers.env.LIMA_CIDATA_USER;
 in
 {
   #
